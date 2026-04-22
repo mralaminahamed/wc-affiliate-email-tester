@@ -243,15 +243,6 @@
 	border-bottom: 1px solid var(--wcaet-border-light);
 }
 
-.wcaet-card h2::before {
-	content: '';
-	flex-shrink: 0;
-	width: 4px;
-	height: 1.1em;
-	background: var(--wcaet-gradient-brand);
-	border-radius: 3px;
-}
-
 /* --------------------------------------------------------------------------
    6. Hero (Dashboard)
    -------------------------------------------------------------------------- */
