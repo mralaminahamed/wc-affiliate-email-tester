@@ -1,0 +1,1122 @@
+/* ==========================================================================
+   WC Affiliate Email Tester – Admin Stylesheet
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Custom properties (design tokens)
+   -------------------------------------------------------------------------- */
+
+:root {
+	--wcaet-primary:        #8523F5;
+	--wcaet-primary-dark:   #6b1bc8;
+	--wcaet-primary-light:  #f0edfb;
+	--wcaet-primary-muted:  #ddd0f9;
+
+	--wcaet-success:        #00a32a;
+	--wcaet-success-bg:     #edfaef;
+	--wcaet-success-border: #a5d6a7;
+
+	--wcaet-error:          #d63638;
+	--wcaet-error-bg:       #fdf0f0;
+	--wcaet-error-border:   #f5a0a0;
+
+	--wcaet-warning:        #c38e00;
+	--wcaet-warning-bg:     #fef9ed;
+	--wcaet-warning-border: #f0c36d;
+
+	--wcaet-info-bg:        #e3f2fd;
+	--wcaet-info-color:     #1565c0;
+	--wcaet-info-border:    #90caf9;
+
+	--wcaet-purple-bg:      #f3e5f5;
+	--wcaet-purple-color:   #6a1b9a;
+	--wcaet-purple-border:  #ce93d8;
+
+	--wcaet-neutral:        #646970;
+	--wcaet-neutral-light:  #8c8f94;
+
+	--wcaet-border:         #e0d9f7;
+	--wcaet-border-light:   #ede9fb;
+	--wcaet-bg:             #f8f7fd;
+	--wcaet-bg-hover:       #f0edfb;
+	--wcaet-card-bg:        #ffffff;
+
+	--wcaet-radius-sm:      6px;
+	--wcaet-radius:         10px;
+	--wcaet-radius-lg:      14px;
+
+	--wcaet-shadow:         0 1px 4px rgba(133,35,245,.08), 0 2px 12px rgba(133,35,245,.04);
+	--wcaet-shadow-card:    0 1px 3px rgba(0,0,0,.06), 0 1px 8px rgba(133,35,245,.06);
+
+	--wcaet-font-sm:        0.8125rem;  /* 13px */
+	--wcaet-font-base:      0.875rem;   /* 14px */
+	--wcaet-font-md:        0.9375rem;  /* 15px */
+	--wcaet-font-lg:        1.0625rem;  /* 17px */
+	--wcaet-font-xl:        1.25rem;    /* 20px */
+	--wcaet-font-2xl:       1.5rem;     /* 24px */
+}
+
+/* --------------------------------------------------------------------------
+   2. Base / reset
+   -------------------------------------------------------------------------- */
+
+.wcaet-wrap *,
+.wcaet-page-nav,
+.wcaet-page-nav * {
+	box-sizing: border-box;
+}
+
+/* Matches WP .wrap: margin 0 20px 0 2px — our custom max-width on top */
+.wcaet-wrap {
+	max-width: 1440px;
+	margin-top: 0;
+	padding-top: 0;
+}
+
+/* Ensure WP .wrap right-margin doesn't create double gap on our wrap */
+.wrap.wcaet-wrap {
+	margin-right: 20px;
+}
+
+/* Remove default WP page-title margin when our nav is present */
+.wcaet-page .wp-header-end {
+	margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+   3. Page nav (shared tab bar)
+   -------------------------------------------------------------------------- */
+
+/*
+ * Nav must mirror WP .wrap margins exactly so it aligns with page content.
+ * WP .wrap = margin: 0 20px 0 2px  →  nav gets the same horizontal margins.
+ * max-width mirrors .wcaet-wrap to prevent overflow on wide viewports.
+ */
+.wcaet-page-nav {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	background: var(--wcaet-card-bg);
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius);
+	padding: 6px;
+	margin: 16px 20px 20px 2px;
+	max-width: 1440px;
+	flex-wrap: wrap;
+	box-shadow: var(--wcaet-shadow);
+}
+
+.wcaet-page-nav__item {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 8px 16px;
+	border-radius: var(--wcaet-radius-sm);
+	font-size: var(--wcaet-font-base);
+	font-weight: 500;
+	color: var(--wcaet-neutral);
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+	white-space: nowrap;
+}
+
+.wcaet-page-nav__item svg {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	opacity: 0.75;
+}
+
+.wcaet-page-nav__item:hover {
+	background: var(--wcaet-bg-hover);
+	color: var(--wcaet-primary);
+}
+
+.wcaet-page-nav__item:hover svg {
+	opacity: 1;
+}
+
+.wcaet-page-nav__item.is-active {
+	background: var(--wcaet-primary-light);
+	color: var(--wcaet-primary-dark);
+	font-weight: 600;
+}
+
+.wcaet-page-nav__item.is-active svg {
+	opacity: 1;
+	color: var(--wcaet-primary);
+}
+
+/* --------------------------------------------------------------------------
+   4. Page header
+   -------------------------------------------------------------------------- */
+
+.wcaet-page-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 22px;
+	flex-wrap: wrap;
+}
+
+.wcaet-page-header h1 {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	font-size: var(--wcaet-font-xl);
+	font-weight: 700;
+	color: #1d2327;
+	line-height: 1.3;
+}
+
+.wcaet-page-header h1 svg {
+	width: 22px;
+	height: 22px;
+	color: var(--wcaet-primary);
+	flex-shrink: 0;
+}
+
+.wcaet-back-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: var(--wcaet-font-sm);
+	color: var(--wcaet-neutral);
+	text-decoration: none;
+	padding: 6px 12px;
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius-sm);
+	background: var(--wcaet-card-bg);
+	transition: color 0.15s, border-color 0.15s;
+}
+
+.wcaet-back-link svg {
+	width: 14px;
+	height: 14px;
+}
+
+.wcaet-back-link:hover {
+	color: var(--wcaet-primary);
+	border-color: var(--wcaet-primary-muted);
+}
+
+/* --------------------------------------------------------------------------
+   5. Card
+   -------------------------------------------------------------------------- */
+
+.wcaet-card {
+	background: var(--wcaet-card-bg);
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius);
+	padding: 24px;
+	margin-bottom: 20px;
+	box-shadow: var(--wcaet-shadow-card);
+}
+
+.wcaet-card h2 {
+	margin: 0 0 18px;
+	font-size: var(--wcaet-font-lg);
+	font-weight: 600;
+	color: #1d2327;
+	padding-bottom: 14px;
+	border-bottom: 1px solid var(--wcaet-border-light);
+}
+
+/* --------------------------------------------------------------------------
+   6. Hero (Dashboard)
+   -------------------------------------------------------------------------- */
+
+.wcaet-hero {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	background: linear-gradient(135deg, var(--wcaet-primary) 0%, var(--wcaet-primary-dark) 100%);
+	color: #fff;
+	border-radius: var(--wcaet-radius);
+	padding: 32px 36px;
+	margin-bottom: 24px;
+	box-shadow: 0 4px 20px rgba(133,35,245,.25);
+}
+
+.wcaet-hero__icon {
+	flex-shrink: 0;
+	width: 52px;
+	height: 52px;
+	background: rgba(255,255,255,.15);
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.wcaet-hero__icon svg {
+	width: 28px;
+	height: 28px;
+}
+
+.wcaet-hero__title {
+	margin: 0 0 6px;
+	font-size: var(--wcaet-font-2xl);
+	font-weight: 700;
+	color: #fff;
+	line-height: 1.2;
+}
+
+.wcaet-hero__desc {
+	margin: 0;
+	font-size: var(--wcaet-font-base);
+	opacity: 0.85;
+	line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   7. Stat cards (Dashboard)
+   -------------------------------------------------------------------------- */
+
+.wcaet-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 14px;
+	margin-bottom: 24px;
+}
+
+.wcaet-stat-card {
+	background: var(--wcaet-card-bg);
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius);
+	padding: 20px 22px;
+	text-align: center;
+	box-shadow: var(--wcaet-shadow-card);
+	transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.wcaet-stat-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 16px rgba(133,35,245,.10);
+}
+
+.wcaet-stat-card__value {
+	font-size: 2.2rem;
+	font-weight: 700;
+	color: var(--wcaet-primary);
+	line-height: 1;
+	margin-bottom: 6px;
+}
+
+.wcaet-stat-card__label {
+	font-size: 0.72rem;
+	color: var(--wcaet-neutral-light);
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	font-weight: 500;
+}
+
+.wcaet-stat-card--sent  .wcaet-stat-card__value { color: var(--wcaet-success); }
+.wcaet-stat-card--failed .wcaet-stat-card__value { color: var(--wcaet-error); }
+.wcaet-stat-card--test  .wcaet-stat-card__value { color: var(--wcaet-info-color); }
+
+/* --------------------------------------------------------------------------
+   8. Feature cards (Dashboard)
+   -------------------------------------------------------------------------- */
+
+.wcaet-features {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 18px;
+	margin-bottom: 24px;
+}
+
+.wcaet-feature-card {
+	background: var(--wcaet-card-bg);
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius);
+	padding: 24px;
+	box-shadow: var(--wcaet-shadow-card);
+	display: flex;
+	flex-direction: column;
+}
+
+.wcaet-feature-card--pro {
+	border-color: var(--wcaet-primary-muted);
+	background: var(--wcaet-primary-light);
+}
+
+.wcaet-feature-card__icon {
+	width: 40px;
+	height: 40px;
+	background: var(--wcaet-primary-light);
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 14px;
+	flex-shrink: 0;
+}
+
+.wcaet-feature-card__icon svg {
+	width: 20px;
+	height: 20px;
+	color: var(--wcaet-primary);
+}
+
+.wcaet-feature-card--pro .wcaet-feature-card__icon {
+	background: var(--wcaet-primary-muted);
+}
+
+.wcaet-feature-card h3 {
+	margin: 0 0 8px;
+	font-size: var(--wcaet-font-md);
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.wcaet-feature-card p {
+	margin: 0 0 16px;
+	color: var(--wcaet-neutral);
+	font-size: var(--wcaet-font-sm);
+	line-height: 1.6;
+	flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   9. Testing page layout
+   -------------------------------------------------------------------------- */
+
+.wcaet-testing-layout {
+	display: grid;
+	grid-template-columns: 380px 1fr;
+	gap: 22px;
+	align-items: start;
+}
+
+.wcaet-send-form {
+	position: sticky;
+	top: 32px;
+}
+
+.wcaet-result-panel {
+	min-height: 200px;
+}
+
+/* --------------------------------------------------------------------------
+   10. Form fields
+   -------------------------------------------------------------------------- */
+
+.wcaet-field {
+	margin-bottom: 18px;
+}
+
+.wcaet-field label {
+	display: block;
+	font-weight: 600;
+	font-size: var(--wcaet-font-sm);
+	color: #1d2327;
+	margin-bottom: 6px;
+}
+
+.wcaet-field input[type="email"],
+.wcaet-field input[type="text"],
+.wcaet-field input[type="number"],
+.wcaet-field select {
+	width: 100%;
+	max-width: 100%;
+	border-radius: var(--wcaet-radius-sm);
+}
+
+.wcaet-field .description {
+	margin: 7px 0 0;
+	color: var(--wcaet-neutral-light);
+	font-style: normal;
+	font-size: 0.78rem;
+	line-height: 1.5;
+}
+
+.wcaet-field--checkbox label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 500;
+	cursor: pointer;
+	color: #1d2327;
+}
+
+.wcaet-field--checkbox input[type="checkbox"] {
+	margin: 0;
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	accent-color: var(--wcaet-primary);
+}
+
+/* --------------------------------------------------------------------------
+   11. Button system
+   -------------------------------------------------------------------------- */
+
+/*
+ * WP core reset — applied to every button variant we own.
+ * WP admin body inherits a large line-height (~41px) onto .button children,
+ * and .button itself sets min-height:40px. Both inflate our buttons to ~61px.
+ * Reset them here so padding alone controls height.
+ */
+.wcaet-wrap .button,
+.wcaet-wrap .button-primary,
+.wcaet-wrap .button-secondary,
+.wcaet-wrap .wcaet-clear-btn,
+.wcaet-wrap .wcaet-delete-btn,
+.wcaet-submit-btn {
+	line-height: 1.4 !important;
+	min-height: 0 !important;
+	height: auto !important;
+	cursor: pointer !important;
+	white-space: nowrap !important;
+	text-decoration: none !important;
+}
+
+/*
+ * Primary — covers WP button-primary anywhere inside our wrap, plus the
+ * explicit wcaet-submit-btn alias used on the test-send CTA.
+ */
+.wcaet-wrap .button-primary,
+.wcaet-submit-btn {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 8px;
+	padding: 9px 20px !important;
+	font-size: var(--wcaet-font-base) !important;
+	font-weight: 600 !important;
+	color: #fff !important;
+	background: var(--wcaet-primary) !important;
+	border-color: var(--wcaet-primary-dark) !important;
+	border-radius: var(--wcaet-radius-sm) !important;
+	box-shadow: 0 2px 6px rgba(133,35,245,.25) !important;
+	transition: background 0.15s, box-shadow 0.15s, border-color 0.15s !important;
+	vertical-align: middle;
+}
+
+.wcaet-wrap .button-primary:hover,
+.wcaet-wrap .button-primary:focus,
+.wcaet-submit-btn:hover,
+.wcaet-submit-btn:focus {
+	background: var(--wcaet-primary-dark) !important;
+	border-color: var(--wcaet-primary-dark) !important;
+	color: #fff !important;
+	box-shadow: 0 4px 12px rgba(133,35,245,.35) !important;
+}
+
+.wcaet-wrap .button-primary svg,
+.wcaet-submit-btn svg {
+	width: 15px;
+	height: 15px;
+	flex-shrink: 0;
+}
+
+/*
+ * Secondary — outlined purple; used for navigation CTA links (View Logs,
+ * Settings) on the dashboard and any non-primary action buttons.
+ */
+.wcaet-wrap .button-secondary {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 7px;
+	padding: 8px 18px !important;
+	font-size: var(--wcaet-font-base) !important;
+	font-weight: 500 !important;
+	color: var(--wcaet-primary-dark) !important;
+	background: var(--wcaet-card-bg) !important;
+	border-color: var(--wcaet-primary-muted) !important;
+	border-radius: var(--wcaet-radius-sm) !important;
+	box-shadow: none !important;
+	transition: background 0.15s, border-color 0.15s, color 0.15s !important;
+	vertical-align: middle;
+}
+
+.wcaet-wrap .button-secondary:hover,
+.wcaet-wrap .button-secondary:focus {
+	background: var(--wcaet-primary-light) !important;
+	border-color: var(--wcaet-primary) !important;
+	color: var(--wcaet-primary-dark) !important;
+	box-shadow: none !important;
+}
+
+.wcaet-wrap .button-secondary svg {
+	width: 15px;
+	height: 15px;
+	flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   12. Select2 overrides (scoped to our pages)
+   -------------------------------------------------------------------------- */
+
+.wcaet-wrap .select2-container {
+	width: 100% !important;
+}
+
+/*
+ * Select2 height matched to native <select> (40px) so all dropdowns
+ * in the form share the same visual height.
+ */
+.wcaet-wrap .select2-container--default .select2-selection--single {
+	height: 40px;
+	border-color: #8c8f94;
+	border-radius: var(--wcaet-radius-sm);
+	background: #fff;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.wcaet-wrap .select2-container--default .select2-selection--single .select2-selection__rendered {
+	line-height: 38px;
+	padding-left: 10px;
+	color: #1d2327;
+	font-size: var(--wcaet-font-base);
+}
+
+.wcaet-wrap .select2-container--default .select2-selection--single .select2-selection__placeholder {
+	color: var(--wcaet-neutral-light);
+}
+
+.wcaet-wrap .select2-container--default .select2-selection--single .select2-selection__arrow {
+	height: 38px;
+	right: 6px;
+}
+
+.wcaet-wrap .select2-container--default.select2-container--open .select2-selection--single,
+.wcaet-wrap .select2-container--default.select2-container--focus .select2-selection--single {
+	border-color: var(--wcaet-primary);
+	box-shadow: 0 0 0 2px var(--wcaet-primary-light);
+	outline: none;
+}
+
+.wcaet-wrap .select2-dropdown {
+	border-color: var(--wcaet-primary-muted);
+	border-radius: var(--wcaet-radius-sm);
+	box-shadow: var(--wcaet-shadow);
+}
+
+.wcaet-wrap .select2-container--default .select2-results__option--highlighted[aria-selected] {
+	background: var(--wcaet-primary);
+}
+
+.wcaet-wrap .select2-search--dropdown .select2-search__field {
+	border-radius: var(--wcaet-radius-sm);
+	border-color: var(--wcaet-border);
+	padding: 6px 10px;
+	font-size: var(--wcaet-font-sm);
+}
+
+/* --------------------------------------------------------------------------
+   13. Badges
+   -------------------------------------------------------------------------- */
+
+.wcaet-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 10px;
+	border-radius: 20px;
+	font-size: 0.72rem;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+.wcaet-badge--sent    { background: var(--wcaet-success-bg);  color: var(--wcaet-success);   border: 1px solid var(--wcaet-success-border); }
+.wcaet-badge--failed  { background: var(--wcaet-error-bg);    color: var(--wcaet-error);     border: 1px solid var(--wcaet-error-border); }
+.wcaet-badge--dryrun  { background: #f0f0f0;                  color: #555;                   border: 1px solid #ccc; }
+.wcaet-badge--warning { background: var(--wcaet-warning-bg);  color: var(--wcaet-warning);   border: 1px solid var(--wcaet-warning-border); }
+.wcaet-badge--captured{ background: var(--wcaet-primary-light); color: var(--wcaet-primary-dark); border: 1px solid var(--wcaet-primary-muted); }
+.wcaet-badge--source-live { background: var(--wcaet-info-bg);   color: var(--wcaet-info-color);   border: 1px solid var(--wcaet-info-border); }
+.wcaet-badge--source-test { background: var(--wcaet-purple-bg); color: var(--wcaet-purple-color); border: 1px solid var(--wcaet-purple-border); }
+
+/* --------------------------------------------------------------------------
+   14. Notices (plugin-scoped, not WP admin notices)
+   -------------------------------------------------------------------------- */
+
+.wcaet-notice {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 12px 16px;
+	border-radius: var(--wcaet-radius-sm);
+	margin-bottom: 16px;
+	font-size: var(--wcaet-font-sm);
+	line-height: 1.5;
+}
+
+.wcaet-notice svg {
+	width: 17px;
+	height: 17px;
+	flex-shrink: 0;
+	margin-top: 1px;
+}
+
+.wcaet-notice p {
+	margin: 0;
+}
+
+.wcaet-notice--error {
+	background: var(--wcaet-error-bg);
+	border: 1px solid var(--wcaet-error-border);
+	color: #6b1111;
+}
+
+.wcaet-notice--error svg { color: var(--wcaet-error); }
+
+.wcaet-notice--warning {
+	background: var(--wcaet-warning-bg);
+	border: 1px solid var(--wcaet-warning-border);
+	color: #6b4200;
+}
+
+.wcaet-notice--warning svg { color: var(--wcaet-warning); }
+
+/* --------------------------------------------------------------------------
+   15. Result panel
+   -------------------------------------------------------------------------- */
+
+.wcaet-result-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 220px;
+	background: var(--wcaet-bg);
+	border: 2px dashed var(--wcaet-border);
+	border-radius: var(--wcaet-radius);
+	color: var(--wcaet-neutral-light);
+	text-align: center;
+	padding: 40px 24px;
+}
+
+.wcaet-result-placeholder__icon svg {
+	width: 44px;
+	height: 44px;
+	opacity: 0.25;
+	margin-bottom: 12px;
+}
+
+.wcaet-result-placeholder p {
+	margin: 0;
+	font-size: var(--wcaet-font-sm);
+}
+
+.wcaet-result {
+	background: var(--wcaet-card-bg);
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius);
+	overflow: hidden;
+	box-shadow: var(--wcaet-shadow-card);
+}
+
+.wcaet-result-summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 14px 18px;
+	background: var(--wcaet-bg);
+	border-bottom: 1px solid var(--wcaet-border);
+}
+
+.wcaet-result-summary__type {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: var(--wcaet-font-base);
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.wcaet-result-summary__type svg {
+	width: 16px;
+	height: 16px;
+	color: var(--wcaet-primary);
+}
+
+.wcaet-result-summary__badges {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.wcaet-result > .wcaet-notice {
+	margin: 16px 18px 0;
+}
+
+/* --------------------------------------------------------------------------
+   16. Tabs (multi-email)
+   -------------------------------------------------------------------------- */
+
+.wcaet-tabs {
+	display: flex;
+	gap: 6px;
+	padding: 12px 18px;
+	border-bottom: 1px solid var(--wcaet-border);
+	background: var(--wcaet-bg);
+	flex-wrap: wrap;
+}
+
+.wcaet-tab-btn {
+	background: var(--wcaet-card-bg);
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius-sm);
+	padding: 7px 14px;
+	cursor: pointer;
+	font-size: var(--wcaet-font-sm);
+	display: inline-flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	color: var(--wcaet-neutral);
+	transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.wcaet-tab-btn:hover {
+	border-color: var(--wcaet-primary-muted);
+	color: var(--wcaet-primary);
+}
+
+.wcaet-tab-btn.is-active {
+	background: var(--wcaet-primary-light);
+	border-color: var(--wcaet-primary);
+	color: var(--wcaet-primary-dark);
+	font-weight: 600;
+}
+
+.wcaet-tab-to {
+	font-size: 0.7rem;
+	opacity: 0.65;
+	max-width: 220px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.wcaet-email-tab-panel {
+	padding: 18px;
+}
+
+/* --------------------------------------------------------------------------
+   17. Email entry
+   -------------------------------------------------------------------------- */
+
+.wcaet-email-entry {
+	/* Container for one captured email inside a tab panel */
+}
+
+.wcaet-meta-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 14px;
+	font-size: var(--wcaet-font-sm);
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius-sm);
+	overflow: hidden;
+}
+
+.wcaet-meta-table th,
+.wcaet-meta-table td {
+	padding: 9px 14px;
+	text-align: left;
+	border-bottom: 1px solid var(--wcaet-border-light);
+}
+
+.wcaet-meta-table tr:last-child th,
+.wcaet-meta-table tr:last-child td {
+	border-bottom: none;
+}
+
+.wcaet-meta-table th {
+	width: 110px;
+	color: var(--wcaet-neutral);
+	font-weight: 600;
+	background: var(--wcaet-bg);
+	white-space: nowrap;
+}
+
+.wcaet-meta-table td {
+	word-break: break-all;
+}
+
+/* --------------------------------------------------------------------------
+   18. Collapsible sections (preview / source / headers)
+   -------------------------------------------------------------------------- */
+
+.wcaet-entry-section {
+	border-top: 1px solid var(--wcaet-border-light);
+}
+
+.wcaet-collapsible-toggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	background: none;
+	border: none;
+	padding: 11px 18px;
+	cursor: pointer;
+	font-size: var(--wcaet-font-sm);
+	font-weight: 600;
+	color: var(--wcaet-neutral);
+	text-align: left;
+	transition: background 0.12s, color 0.12s;
+}
+
+.wcaet-collapsible-toggle:hover {
+	background: var(--wcaet-bg);
+	color: var(--wcaet-primary);
+}
+
+.wcaet-collapsible-toggle svg {
+	width: 15px;
+	height: 15px;
+	flex-shrink: 0;
+}
+
+/* Rotate the last SVG (chevron) when expanded */
+.wcaet-collapsible-toggle svg:last-child {
+	margin-left: auto;
+	transition: transform 0.2s ease;
+}
+
+.wcaet-collapsible-toggle[aria-expanded="true"] svg:last-child {
+	transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   19. Preview iframe
+   -------------------------------------------------------------------------- */
+
+.wcaet-preview-iframe {
+	width: 100%;
+	min-height: 420px;
+	border: none;
+	display: block;
+	border-top: 1px solid var(--wcaet-border-light);
+}
+
+/* --------------------------------------------------------------------------
+   20. Source / headers code block
+   -------------------------------------------------------------------------- */
+
+.wcaet-source-block {
+	background: #1a1b26;
+	color: #c0caf5;
+	padding: 18px 22px;
+	margin: 0;
+	overflow: auto;
+	font-size: 0.78rem;
+	line-height: 1.65;
+	max-height: 420px;
+	border-top: 1px solid var(--wcaet-border-light);
+}
+
+.wcaet-source-block code {
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	background: none;
+	color: inherit;
+	padding: 0;
+}
+
+/* --------------------------------------------------------------------------
+   21. Logs list page
+   -------------------------------------------------------------------------- */
+
+.wcaet-logs-controls {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 14px;
+}
+
+.wcaet-clear-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+	padding: 7px 14px !important;
+	font-size: var(--wcaet-font-sm) !important;
+	color: var(--wcaet-error) !important;
+	border-color: var(--wcaet-error-border) !important;
+	border-radius: var(--wcaet-radius-sm) !important;
+}
+
+.wcaet-clear-btn:hover {
+	background: var(--wcaet-error-bg) !important;
+	border-color: var(--wcaet-error) !important;
+}
+
+.wcaet-clear-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* WP list table integration */
+.wcaet-wrap #the-list tr:hover td,
+.wcaet-wrap #the-list tr:hover th {
+	background: var(--wcaet-bg);
+}
+
+.wcaet-wrap .wp-list-table .column-id    { width: 60px; }
+.wcaet-wrap .wp-list-table .column-status{ width: 90px; }
+.wcaet-wrap .wp-list-table .column-source{ width: 80px; }
+
+.wcaet-error-text { color: var(--wcaet-error); }
+
+/* --------------------------------------------------------------------------
+   22. Log view page
+   -------------------------------------------------------------------------- */
+
+.wcaet-log-view-grid {
+	display: grid;
+	grid-template-columns: 300px 1fr;
+	gap: 22px;
+	align-items: start;
+}
+
+.wcaet-log-meta h3 {
+	margin: 0 0 14px;
+	font-size: var(--wcaet-font-md);
+	font-weight: 600;
+}
+
+.wcaet-log-actions {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid var(--wcaet-border-light);
+}
+
+.wcaet-delete-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+	padding: 7px 14px !important;
+	font-size: var(--wcaet-font-sm) !important;
+	color: var(--wcaet-error) !important;
+	border-color: var(--wcaet-error-border) !important;
+	border-radius: var(--wcaet-radius-sm) !important;
+}
+
+.wcaet-delete-btn:hover {
+	background: var(--wcaet-error-bg) !important;
+	border-color: var(--wcaet-error) !important;
+}
+
+.wcaet-delete-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.wcaet-log-preview-area {
+	background: var(--wcaet-card-bg);
+	border: 1px solid var(--wcaet-border);
+	border-radius: var(--wcaet-radius);
+	overflow: hidden;
+	box-shadow: var(--wcaet-shadow-card);
+}
+
+.wcaet-log-preview-area .wcaet-entry-section:first-child {
+	border-top: none;
+}
+
+/* --------------------------------------------------------------------------
+   23. Settings page
+   -------------------------------------------------------------------------- */
+
+.wcaet-settings-form .wcaet-card {
+	max-width: 680px;
+}
+
+.wcaet-settings-section h2 {
+	font-size: var(--wcaet-font-md);
+}
+
+.wcaet-dependent {
+	opacity: 1;
+	transition: opacity 0.2s, pointer-events 0.2s;
+}
+
+.wcaet-dependent.is-disabled {
+	opacity: 0.4;
+	pointer-events: none;
+	user-select: none;
+}
+
+.wcaet-settings-form hr {
+	border: none;
+	border-top: 1px solid var(--wcaet-border-light);
+	margin: 20px 0;
+}
+
+.wcaet-settings-form p.description {
+	margin-top: 16px;
+}
+
+
+/* --------------------------------------------------------------------------
+   24. Responsive breakpoints
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+	.wcaet-testing-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.wcaet-send-form {
+		position: static;
+	}
+}
+
+@media (max-width: 960px) {
+	.wcaet-log-view-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.wcaet-hero {
+		padding: 24px;
+	}
+
+	.wcaet-hero__title {
+		font-size: 1.3rem;
+	}
+}
+
+@media (max-width: 782px) {
+	.wcaet-page-nav {
+		gap: 1px;
+	}
+
+	.wcaet-page-nav__item {
+		padding: 7px 10px;
+		font-size: 0.8rem;
+	}
+
+	.wcaet-features {
+		grid-template-columns: 1fr;
+	}
+
+	.wcaet-stats {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.wcaet-page-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+@media (max-width: 480px) {
+	.wcaet-stats {
+		grid-template-columns: 1fr;
+	}
+
+	.wcaet-page-nav__item span {
+		display: none; /* icon-only on very small screens */
+	}
+
+	.wcaet-page-nav__item svg {
+		opacity: 1;
+	}
+}
