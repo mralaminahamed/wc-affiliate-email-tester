@@ -1,0 +1,42 @@
+# Composer
+/vendor/
+composer.phar
+
+# Node
+/node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Build artifacts
+/dist/
+/build/
+*.min.css
+*.min.js
+
+# PHPUnit
+/coverage/
+.phpunit.result.cache
+.phpunit.cache/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# WordPress
+wp-config.php
+/wp-content/uploads/
+
+# Logs
+*.log
