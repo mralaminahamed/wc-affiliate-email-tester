@@ -4,6 +4,7 @@
 	<div class="wcaet-hero">
 		<div class="wcaet-hero__icon"><?php WCA_Email_Tester_Icons::render( 'mail' ); ?></div>
 		<div class="wcaet-hero__content">
+			<span class="wcaet-hero__badge">v<?php echo esc_html( WCA_ET_VERSION ); ?></span>
 			<h1 class="wcaet-hero__title"><?php esc_html_e( 'WC Affiliate Email Tester', 'wc-affiliate-email-tester' ); ?></h1>
 			<p class="wcaet-hero__desc"><?php esc_html_e( 'Preview and debug every WC Affiliate email notification without real triggers or live SMTP.', 'wc-affiliate-email-tester' ); ?></p>
 		</div>
@@ -11,20 +12,32 @@
 
 	<div class="wcaet-stats">
 		<div class="wcaet-stat-card">
-			<div class="wcaet-stat-card__value"><?php echo esc_html( number_format_i18n( $total ) ); ?></div>
-			<div class="wcaet-stat-card__label"><?php esc_html_e( 'Total Logged', 'wc-affiliate-email-tester' ); ?></div>
+			<div class="wcaet-stat-card__icon"><?php WCA_Email_Tester_Icons::render( 'mail' ); ?></div>
+			<div class="wcaet-stat-card__body">
+				<div class="wcaet-stat-card__value"><?php echo esc_html( number_format_i18n( $total ) ); ?></div>
+				<div class="wcaet-stat-card__label"><?php esc_html_e( 'Total Logged', 'wc-affiliate-email-tester' ); ?></div>
+			</div>
 		</div>
 		<div class="wcaet-stat-card wcaet-stat-card--sent">
-			<div class="wcaet-stat-card__value"><?php echo esc_html( number_format_i18n( $sent ) ); ?></div>
-			<div class="wcaet-stat-card__label"><?php esc_html_e( 'Sent', 'wc-affiliate-email-tester' ); ?></div>
+			<div class="wcaet-stat-card__icon"><?php WCA_Email_Tester_Icons::render( 'circle-check' ); ?></div>
+			<div class="wcaet-stat-card__body">
+				<div class="wcaet-stat-card__value"><?php echo esc_html( number_format_i18n( $sent ) ); ?></div>
+				<div class="wcaet-stat-card__label"><?php esc_html_e( 'Sent', 'wc-affiliate-email-tester' ); ?></div>
+			</div>
 		</div>
 		<div class="wcaet-stat-card wcaet-stat-card--failed">
-			<div class="wcaet-stat-card__value"><?php echo esc_html( number_format_i18n( $failed ) ); ?></div>
-			<div class="wcaet-stat-card__label"><?php esc_html_e( 'Failed', 'wc-affiliate-email-tester' ); ?></div>
+			<div class="wcaet-stat-card__icon"><?php WCA_Email_Tester_Icons::render( 'alert' ); ?></div>
+			<div class="wcaet-stat-card__body">
+				<div class="wcaet-stat-card__value"><?php echo esc_html( number_format_i18n( $failed ) ); ?></div>
+				<div class="wcaet-stat-card__label"><?php esc_html_e( 'Failed', 'wc-affiliate-email-tester' ); ?></div>
+			</div>
 		</div>
 		<div class="wcaet-stat-card wcaet-stat-card--test">
-			<div class="wcaet-stat-card__value"><?php echo esc_html( number_format_i18n( $test_count ) ); ?></div>
-			<div class="wcaet-stat-card__label"><?php esc_html_e( 'Test Sends', 'wc-affiliate-email-tester' ); ?></div>
+			<div class="wcaet-stat-card__icon"><?php WCA_Email_Tester_Icons::render( 'send' ); ?></div>
+			<div class="wcaet-stat-card__body">
+				<div class="wcaet-stat-card__value"><?php echo esc_html( number_format_i18n( $test_count ) ); ?></div>
+				<div class="wcaet-stat-card__label"><?php esc_html_e( 'Test Sends', 'wc-affiliate-email-tester' ); ?></div>
+			</div>
 		</div>
 	</div>
 

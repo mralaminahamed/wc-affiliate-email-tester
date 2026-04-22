@@ -14,6 +14,7 @@
 		<!-- Send Form -->
 		<div class="wcaet-card wcaet-send-form">
 			<h2><?php esc_html_e( 'Send Test Email', 'wc-affiliate-email-tester' ); ?></h2>
+			<p class="wcaet-card__subtitle"><?php esc_html_e( 'Select an email type and a target affiliate, referral, or transaction to fire a real notification.', 'wc-affiliate-email-tester' ); ?></p>
 
 			<form method="post">
 				<?php wp_nonce_field( 'wca_et_send', 'wca_et_send_nonce' ); ?>
