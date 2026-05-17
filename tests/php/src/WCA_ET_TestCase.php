@@ -29,9 +29,36 @@ abstract class WCA_ET_TestCase extends WCAffiliateTestCase {
 
 		wp_set_current_user( $this->admin_id );
 
-		$this->wc_order_id    = $this->create_single_affiliate_order( $this->affiliate_id1 );
+		$this->wc_order_id    = $this->create_single_affiliate_order(
+			$this->affiliate_id1,
+			$this->get_simple_order_data()
+		);
 		$this->referral_id    = $this->create_test_referral();
 		$this->transaction_id = $this->create_test_transaction();
+	}
+
+	/**
+	 * Minimal order data: no fee/shipping items to avoid OrderFactory::set_item_fee()
+	 * which is absent in the current WCA build.
+	 */
+	protected function get_simple_order_data(): array {
+		return [
+			'item_fee_list'      => [],
+			'shipping_item_list' => [],
+			'status'             => 'processing',
+			'customer_id'        => $this->customer_id,
+			'line_items'         => [
+				[
+					'product'  => [
+						'name'          => 'Test Product',
+						'regular_price' => 10,
+						'price'         => 10,
+						'affiliate_id'  => $this->affiliate_id1,
+					],
+					'quantity' => 1,
+				],
+			],
+		];
 	}
 
 	public function tear_down(): void {

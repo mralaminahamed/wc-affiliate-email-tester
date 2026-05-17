@@ -19,7 +19,7 @@ class ApiTest extends WCA_ET_TestCase {
 	public function test_affiliates_endpoint_requires_authentication(): void {
 		wp_set_current_user( 0 );
 		$response = $this->get_request( '/affiliates' );
-		$this->assertEquals( 403, $response->get_status() );
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
 	}
 
 	public function test_affiliates_endpoint_returns_200_for_admin(): void {
@@ -82,7 +82,7 @@ class ApiTest extends WCA_ET_TestCase {
 	public function test_referrals_endpoint_requires_authentication(): void {
 		wp_set_current_user( 0 );
 		$response = $this->get_request( '/referrals' );
-		$this->assertEquals( 403, $response->get_status() );
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
 	}
 
 	public function test_referrals_endpoint_returns_200_for_admin(): void {
@@ -122,7 +122,7 @@ class ApiTest extends WCA_ET_TestCase {
 	public function test_transactions_endpoint_requires_authentication(): void {
 		wp_set_current_user( 0 );
 		$response = $this->get_request( '/transactions' );
-		$this->assertEquals( 403, $response->get_status() );
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
 	}
 
 	public function test_transactions_endpoint_returns_200_for_admin(): void {

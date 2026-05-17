@@ -1,7 +1,8 @@
 <?php
 
-// Resolve WordPress root: two levels up from plugins dir, or one from the standard structure.
-$wordpress_dir = dirname( __DIR__, 4 ) . '/';
+// Resolve WordPress root from this file's location:
+//   tests/php/phpunit-wp-config.php → 5 levels up = WP root.
+$wordpress_dir = dirname( __DIR__, 5 ) . '/';
 
 /* Path to the WordPress codebase you'd like to test. Add a forward slash in the end. */
 define( 'ABSPATH', $wordpress_dir );

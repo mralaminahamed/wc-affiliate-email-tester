@@ -4,13 +4,15 @@ define( 'WCA_ET_TEST_PLUGIN_DIR', dirname( __DIR__, 2 ) );
 define( 'WCA_CORE_TEST_DIR', dirname( WCA_ET_TEST_PLUGIN_DIR ) . '/wc-affiliate' );
 define( 'WCA_WC_TEST_DIR', dirname( WCA_ET_TEST_PLUGIN_DIR ) . '/woocommerce' );
 
-// Email tester autoloader (classmap for plugin classes).
-require_once WCA_ET_TEST_PLUGIN_DIR . '/vendor/autoload.php';
-
-// WC Affiliate autoloader — also exposes its test dev classes via classmap.
+// WC Affiliate autoloader must be registered first so its yoast/phpunit-polyfills
+// version wins class resolution (WCAffiliateTestCase::getProperty is non-static,
+// which conflicts with the AssertAttributeHelper trait added in polyfills ≥1.1).
 if ( file_exists( WCA_CORE_TEST_DIR . '/vendor/autoload.php' ) ) {
 	require_once WCA_CORE_TEST_DIR . '/vendor/autoload.php';
 }
+
+// Email tester autoloader (classmap for plugin classes).
+require_once WCA_ET_TEST_PLUGIN_DIR . '/vendor/autoload.php';
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' ) ?: getenv( 'WP_PHPUNIT__DIR' );
 

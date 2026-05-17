@@ -366,7 +366,7 @@ class SenderTest extends WCA_ET_TestCase {
 		do_action( 'wc_affiliate_affiliate_applied', $this->affiliate_id1, [
 			'first_name' => 'Test',
 			'last_name'  => 'Affiliate',
-			'email'      => get_userdata( $this->affiliate_id1 )->user_email,
+			'user_email' => get_userdata( $this->affiliate_id1 )->user_email,
 		] );
 
 		remove_filter( 'pre_wp_mail', '__return_true', 5 );
