@@ -18,6 +18,12 @@ if ( ! empty( $_GET['cleared'] ) ) : ?>
 	<div class="notice notice-success is-dismissible">
 		<p><?php esc_html_e( 'All log entries cleared.', 'wc-affiliate-email-tester' ); ?></p>
 	</div>
+<?php endif;
+
+if ( ! empty( $_GET['purged'] ) ) : ?>
+	<div class="notice notice-success is-dismissible">
+		<p><?php esc_html_e( 'Retention rules applied. Stale log entries purged.', 'wc-affiliate-email-tester' ); ?></p>
+	</div>
 <?php endif; ?>
 
 <div class="wrap wcaet-wrap">
@@ -36,6 +42,12 @@ if ( ! empty( $_GET['cleared'] ) ) : ?>
 			<button type="submit" class="button wcaet-clear-btn">
 				<?php WCA_Email_Tester_Icons::render( 'trash' ); ?>
 				<?php esc_html_e( 'Clear All Logs', 'wc-affiliate-email-tester' ); ?>
+			</button>
+		</form>
+		<form method="post" class="wcaet-clear-form">
+			<?php wp_nonce_field( 'wca_et_purge', 'wca_et_purge_nonce' ); ?>
+			<button type="submit" class="button">
+				<?php esc_html_e( 'Purge Now (apply retention rules)', 'wc-affiliate-email-tester' ); ?>
 			</button>
 		</form>
 	</div>

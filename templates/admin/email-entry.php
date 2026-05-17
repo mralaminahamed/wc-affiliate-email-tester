@@ -55,6 +55,8 @@ $unresolved = array_unique( $unresolved_matches[0] ?? array() );
 			<iframe
 				class="wcaet-preview-iframe"
 				src="data:text/html;base64,<?php echo esc_attr( $encoded ); ?>"
+				sandbox="allow-same-origin"
+				referrerpolicy="no-referrer"
 				title="<?php esc_attr_e( 'Email Preview', 'wc-affiliate-email-tester' ); ?>"
 			></iframe>
 		</div>

@@ -9,7 +9,13 @@ $headers_str = is_array( $headers ) ? implode( "\n", $headers ) : (string) $head
 	<div class="wcaet-page-header">
 		<h1>
 			<?php WCA_Email_Tester_Icons::render( 'mail' ); ?>
-			<?php echo esc_html( sprintf( __( 'Log #%d', 'wc-affiliate-email-tester' ), absint( $log->id ) ) ); ?>
+			<?php
+			echo esc_html( sprintf(
+				/* translators: %d: log entry ID */
+				__( 'Log #%d', 'wc-affiliate-email-tester' ),
+				absint( $log->id )
+			) );
+			?>
 		</h1>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wca-email-tester-logs' ) ); ?>" class="wcaet-back-link">
 			<?php WCA_Email_Tester_Icons::render( 'arrow-left' ); ?>
@@ -102,6 +108,8 @@ $headers_str = is_array( $headers ) ? implode( "\n", $headers ) : (string) $head
 					<iframe
 						class="wcaet-preview-iframe"
 						src="data:text/html;base64,<?php echo esc_attr( $encoded ); ?>"
+						sandbox="allow-same-origin"
+						referrerpolicy="no-referrer"
 						title="<?php esc_attr_e( 'Email Preview', 'wc-affiliate-email-tester' ); ?>"
 					></iframe>
 				</div>

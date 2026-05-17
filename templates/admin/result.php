@@ -62,7 +62,13 @@ $type_label  = $email_types[ $result['email_type'] ] ?? $result['email_type'];
 						aria-selected="<?php echo 0 === $i ? 'true' : 'false'; ?>"
 						data-tab="wcaet-tab-<?php echo esc_attr( $i ); ?>"
 					>
-						<?php echo esc_html( sprintf( __( 'Email %d', 'wc-affiliate-email-tester' ), $i + 1 ) ); ?>
+						<?php
+						echo esc_html( sprintf(
+							/* translators: %d: email index in tab list */
+							__( 'Email %d', 'wc-affiliate-email-tester' ),
+							$i + 1
+						) );
+						?>
 						<span class="wcaet-tab-to"><?php echo esc_html( is_array( $mail['to'] ) ? implode( ', ', $mail['to'] ) : $mail['to'] ); ?></span>
 					</button>
 				<?php endforeach; ?>

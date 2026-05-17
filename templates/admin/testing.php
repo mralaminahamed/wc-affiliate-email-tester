@@ -23,7 +23,7 @@
 					<label for="email_type"><?php esc_html_e( 'Email Type', 'wc-affiliate-email-tester' ); ?></label>
 					<select id="email_type" name="email_type">
 						<?php foreach ( $email_types as $key => $label ) : ?>
-							<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $result['email_type'] ?? '', $key ); ?>>
+							<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $prefilled_type, $key ); ?>>
 								<?php echo esc_html( $label ); ?>
 							</option>
 						<?php endforeach; ?>
@@ -90,7 +90,7 @@
 						type="email"
 						id="override_email"
 						name="override_email"
-						value="<?php echo esc_attr( sanitize_email( $_POST['override_email'] ?? '' ) ); ?>"
+						value="<?php echo esc_attr( $prefilled_override ); ?>"
 						placeholder="<?php esc_attr_e( 'Leave empty to use original recipient', 'wc-affiliate-email-tester' ); ?>"
 					>
 					<p class="description"><?php esc_html_e( 'All emails will be redirected to this address instead of the original recipient.', 'wc-affiliate-email-tester' ); ?></p>
@@ -98,7 +98,7 @@
 
 				<div class="wcaet-field wcaet-field--checkbox">
 					<label>
-						<input type="checkbox" name="dry_run" value="1" <?php checked( ! empty( $_POST['dry_run'] ) ); ?>>
+						<input type="checkbox" name="dry_run" value="1" <?php checked( $prefilled_dry_run ); ?>>
 						<?php esc_html_e( 'Dry Run (capture without sending)', 'wc-affiliate-email-tester' ); ?>
 					</label>
 					<p class="description"><?php esc_html_e( 'Preview the rendered email without actually dispatching it via wp_mail().', 'wc-affiliate-email-tester' ); ?></p>
