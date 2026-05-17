@@ -13,6 +13,9 @@ class WCA_Email_Tester_Logger {
 	private bool $is_test_send = false;
 	private array $pending_args = array();
 
+	/** @var array|null Memoized settings (per request). */
+	private ?array $settings_cache = null;
+
 	public function __construct() {
 		add_filter( 'wp_mail', array( $this, '_capture_args' ), PHP_INT_MAX );
 		add_action( 'wp_mail_succeeded', array( $this, '_log_success' ) );
@@ -20,6 +23,8 @@ class WCA_Email_Tester_Logger {
 		add_action( 'wca_email_tester_before_test_send', array( $this, '_mark_test' ) );
 		add_action( 'wca_email_tester_after_test_send', array( $this, '_unmark_test' ) );
 		add_action( self::CRON_HOOK, array( $this, 'purge_old_logs' ) );
+		add_action( 'update_option_' . self::OPTION_KEY, array( $this, 'flush_settings_cache' ) );
+		add_action( 'add_option_' . self::OPTION_KEY, array( $this, 'flush_settings_cache' ) );
 	}
 
 	// -----------------------------------------------------------------------
@@ -203,6 +208,34 @@ class WCA_Email_Tester_Logger {
 		return $wpdb->get_results( $sql ) ?: array(); // phpcs:ignore
 	}
 
+	/**
+	 * Single-query aggregate of total / sent / failed / test counts.
+	 *
+	 * @return array{total:int,sent:int,failed:int,test_count:int}
+	 */
+	public function get_stats(): array {
+		global $wpdb;
+		$table = $wpdb->prefix . self::TABLE_SUFFIX;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+		$row = $wpdb->get_row(
+			"SELECT
+				COUNT(*) AS total,
+				SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS sent,
+				SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) AS failed,
+				SUM(CASE WHEN source = 'test' THEN 1 ELSE 0 END) AS test_count
+			FROM {$table}",
+			ARRAY_A
+		);
+
+		return array(
+			'total'      => (int) ( $row['total'] ?? 0 ),
+			'sent'       => (int) ( $row['sent'] ?? 0 ),
+			'failed'     => (int) ( $row['failed'] ?? 0 ),
+			'test_count' => (int) ( $row['test_count'] ?? 0 ),
+		);
+	}
+
 	public function count_logs( array $args = array() ): int {
 		global $wpdb;
 		$table  = $wpdb->prefix . self::TABLE_SUFFIX;
@@ -302,6 +335,10 @@ class WCA_Email_Tester_Logger {
 	}
 
 	public function get_settings(): array {
+		if ( null !== $this->settings_cache ) {
+			return $this->settings_cache;
+		}
+
 		$defaults = array(
 			'logger_enabled'                 => true,
 			'logger_log_test_emails'         => true,
@@ -311,7 +348,16 @@ class WCA_Email_Tester_Logger {
 			'logger_retention_days'          => 30,
 			'logger_delete_on_uninstall'     => false,
 		);
-		$saved    = get_option( self::OPTION_KEY, array() );
-		return wp_parse_args( $saved, $defaults );
+		$saved = get_option( self::OPTION_KEY, array() );
+
+		$this->settings_cache = wp_parse_args( $saved, $defaults );
+		return $this->settings_cache;
+	}
+
+	/**
+	 * Invalidate the memoized settings cache. Call after update_option().
+	 */
+	public function flush_settings_cache(): void {
+		$this->settings_cache = null;
 	}
 }
