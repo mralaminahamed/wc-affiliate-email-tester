@@ -202,9 +202,11 @@ class WCA_Email_Tester_Admin {
 	}
 
 	public function body_class( string $classes ): string {
-		$page = sanitize_text_field( $_GET['page'] ?? '' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only page slug check.
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 		if ( in_array( $page, self::PAGES, true ) ) {
-			$classes = preg_replace( '/\bfolded\b/', '', $classes );
+			// Force admin sidebar to stay expanded on our pages.
+			$classes  = preg_replace( '/\bfolded\b/', '', $classes );
 			$classes .= ' wcaet-page';
 		}
 		return $classes;
@@ -215,41 +217,53 @@ class WCA_Email_Tester_Admin {
 	// -----------------------------------------------------------------------
 
 	public function render_dashboard(): void {
-		$total      = $this->logger->count_logs();
-		$sent       = $this->logger->count_logs( array( 'status' => 1 ) );
-		$failed     = $this->logger->count_logs( array( 'status' => 0 ) );
-		$test_count = $this->logger->count_logs( array( 'source' => 'test' ) );
+		$stats = WCA_Email_Tester_Logger::table_exists()
+			? $this->logger->get_stats()
+			: array( 'total' => 0, 'sent' => 0, 'failed' => 0, 'test_count' => 0 );
+
+		$total      = $stats['total'];
+		$sent       = $stats['sent'];
+		$failed     = $stats['failed'];
+		$test_count = $stats['test_count'];
+
 		$this->render_page_nav();
 		$this->load_template( 'dashboard', compact( 'total', 'sent', 'failed', 'test_count' ) );
 	}
 
 	public function render_testing(): void {
-		$result   = null;
-		$settings = $this->logger->get_settings();
+		$result               = null;
+		$settings             = $this->logger->get_settings();
+		$selected_affiliate   = 0;
+		$selected_referral    = 0;
+		$selected_transaction = 0;
+		$prefilled_override   = '';
+		$prefilled_dry_run    = false;
+		$prefilled_type       = '';
 
+		// Only read POST data after nonce validation — prevents cross-form
+		// POST values from being silently echoed back into the form.
 		if ( isset( $_POST['wca_et_send_nonce'] ) ) {
 			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wca_et_send_nonce'] ) ), 'wca_et_send' ) ) {
 				wp_die( esc_html__( 'Security check failed.', 'wc-affiliate-email-tester' ) );
 			}
 
-			$email_type     = sanitize_text_field( $_POST['email_type'] ?? '' );
-			$affiliate_id   = absint( $_POST['affiliate_id'] ?? 0 );
-			$referral_id    = absint( $_POST['referral_id'] ?? 0 );
-			$transaction_id = absint( $_POST['transaction_id'] ?? 0 );
-			$override_email = sanitize_email( $_POST['override_email'] ?? '' );
-			$dry_run        = ! empty( $_POST['dry_run'] );
+			$email_type           = isset( $_POST['email_type'] ) ? sanitize_text_field( wp_unslash( $_POST['email_type'] ) ) : '';
+			$selected_affiliate   = absint( $_POST['affiliate_id'] ?? 0 );
+			$selected_referral    = absint( $_POST['referral_id'] ?? 0 );
+			$selected_transaction = absint( $_POST['transaction_id'] ?? 0 );
+			$override_email       = isset( $_POST['override_email'] ) ? sanitize_email( wp_unslash( $_POST['override_email'] ) ) : '';
+			$dry_run              = ! empty( $_POST['dry_run'] );
+
+			$prefilled_type     = $email_type;
+			$prefilled_override = $override_email;
+			$prefilled_dry_run  = $dry_run;
 
 			$sender = new WCA_Email_Tester_Sender( $override_email, $dry_run );
-			$result = $sender->send( $email_type, $affiliate_id, $referral_id, $transaction_id );
+			$result = $sender->send( $email_type, $selected_affiliate, $selected_referral, $selected_transaction );
 		}
 
 		$email_types = WCA_Email_Tester_Sender::email_types();
 		$field_map   = WCA_Email_Tester_Sender::field_for_type();
-
-		// Pre-selected values for Select2.
-		$selected_affiliate   = absint( $_POST['affiliate_id'] ?? 0 );
-		$selected_referral    = absint( $_POST['referral_id'] ?? 0 );
-		$selected_transaction = absint( $_POST['transaction_id'] ?? 0 );
 
 		$affiliate_option   = $selected_affiliate ? WCA_Email_Tester_API::get_affiliate_option( $selected_affiliate ) : null;
 		$referral_option    = $selected_referral ? WCA_Email_Tester_API::get_referral_option( $selected_referral ) : null;
@@ -259,16 +273,22 @@ class WCA_Email_Tester_Admin {
 		$this->load_template( 'testing', compact(
 			'result', 'email_types', 'field_map', 'settings',
 			'selected_affiliate', 'selected_referral', 'selected_transaction',
-			'affiliate_option', 'referral_option', 'transaction_option'
+			'affiliate_option', 'referral_option', 'transaction_option',
+			'prefilled_type', 'prefilled_override', 'prefilled_dry_run'
 		) );
 	}
 
 	public function render_logs(): void {
-		$action = sanitize_text_field( $_GET['action'] ?? '' );
+		if ( ! WCA_Email_Tester_Logger::table_exists() ) {
+			WCA_Email_Tester_Logger::create_table();
+		}
+
+		$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
 
 		if ( 'view' === $action ) {
 			$log_id = absint( $_GET['log_id'] ?? 0 );
-			if ( ! wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'wca_et_view_log_' . $log_id ) ) {
+			$nonce  = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+			if ( ! wp_verify_nonce( $nonce, 'wca_et_view_log_' . $log_id ) ) {
 				wp_die( esc_html__( 'Security check failed.', 'wc-affiliate-email-tester' ) );
 			}
 			$log = $this->logger->get_log( $log_id );
@@ -280,22 +300,24 @@ class WCA_Email_Tester_Admin {
 
 		if ( 'delete' === $action ) {
 			$log_id = absint( $_GET['log_id'] ?? 0 );
-			if ( ! wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ?? '' ), 'wca_et_delete_log_' . $log_id ) ) {
+			$nonce  = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+			if ( ! wp_verify_nonce( $nonce, 'wca_et_delete_log_' . $log_id ) ) {
 				wp_die( esc_html__( 'Security check failed.', 'wc-affiliate-email-tester' ) );
 			}
 			$this->logger->delete_log( $log_id );
-			wp_redirect( esc_url_raw( admin_url( 'admin.php?page=wca-email-tester-logs&deleted=1' ) ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=wca-email-tester-logs&deleted=1' ) );
 			exit;
 		}
 
 		// Bulk actions.
-		if ( isset( $_POST['action'] ) && 'delete' === $_POST['action'] ) {
+		if ( isset( $_POST['action'] ) && 'delete' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) {
 			check_admin_referer( 'bulk-logs' );
 			$ids = array_map( 'absint', (array) ( $_POST['log_ids'] ?? array() ) );
+			$ids = array_filter( $ids );
 			if ( $ids ) {
 				$this->logger->delete_logs( $ids );
 			}
-			wp_redirect( esc_url_raw( admin_url( 'admin.php?page=wca-email-tester-logs&deleted=' . count( $ids ) ) ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=wca-email-tester-logs&deleted=' . count( $ids ) ) );
 			exit;
 		}
 
@@ -305,7 +327,17 @@ class WCA_Email_Tester_Admin {
 				wp_die( esc_html__( 'Security check failed.', 'wc-affiliate-email-tester' ) );
 			}
 			$this->logger->truncate();
-			wp_redirect( esc_url_raw( admin_url( 'admin.php?page=wca-email-tester-logs&cleared=1' ) ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=wca-email-tester-logs&cleared=1' ) );
+			exit;
+		}
+
+		// Purge now (manual trigger of the retention cron job).
+		if ( isset( $_POST['wca_et_purge_nonce'] ) ) {
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wca_et_purge_nonce'] ) ), 'wca_et_purge' ) ) {
+				wp_die( esc_html__( 'Security check failed.', 'wc-affiliate-email-tester' ) );
+			}
+			$this->logger->purge_old_logs();
+			wp_safe_redirect( admin_url( 'admin.php?page=wca-email-tester-logs&purged=1' ) );
 			exit;
 		}
 
@@ -335,6 +367,7 @@ class WCA_Email_Tester_Admin {
 			);
 
 			update_option( WCA_Email_Tester_Logger::OPTION_KEY, $options );
+			$this->logger->flush_settings_cache();
 			$saved = true;
 		}
 
