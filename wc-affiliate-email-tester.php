@@ -7,7 +7,9 @@
  * Author:      Al Amin Ahamed
  * Author URI:  https://github.com/mralaminahamed
  * Text Domain: wc-affiliate-email-tester
+ * Domain Path: /languages
  * Requires at least: 6.5
+ * Tested up to: 6.7
  * Requires PHP: 8.0
  * WC requires at least: 7.0
  */
@@ -59,6 +61,16 @@ function wca_et_init(): void {
 					__( 'WC Affiliate Email Tester requires PHP %s or higher.', 'wc-affiliate-email-tester' ),
 					WCA_ET_MIN_PHP
 				) ) .
+				'</p></div>';
+		} );
+		return;
+	}
+
+	// WooCommerce core check (needed for WC() helper used in admin asset enqueue).
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', static function () {
+			echo '<div class="notice notice-error"><p>' .
+				esc_html__( 'WC Affiliate Email Tester requires WooCommerce to be active.', 'wc-affiliate-email-tester' ) .
 				'</p></div>';
 		} );
 		return;
