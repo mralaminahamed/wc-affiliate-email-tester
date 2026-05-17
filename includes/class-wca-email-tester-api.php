@@ -135,17 +135,17 @@ class WCA_Email_Tester_API {
 		if ( $search ) {
 			$like = '%' . $wpdb->esc_like( $search ) . '%';
 			$rows = $wpdb->get_results( $wpdb->prepare( // phpcs:ignore
-				"SELECT t.id, t.affiliate, t.amount, t.type, u.display_name
+				"SELECT t.id, t.affiliate, t.amount, t.status, u.display_name
 				FROM {$table} t
 				LEFT JOIN {$wpdb->users} u ON t.affiliate = u.ID
-				WHERE t.id LIKE %s OR t.affiliate LIKE %s OR u.display_name LIKE %s OR t.type LIKE %s
+				WHERE t.id LIKE %s OR t.affiliate LIKE %s OR u.display_name LIKE %s OR t.status LIKE %s
 				ORDER BY t.id DESC
 				LIMIT %d",
 				$like, $like, $like, $like, $per_page
 			) );
 		} else {
 			$rows = $wpdb->get_results( $wpdb->prepare( // phpcs:ignore
-				"SELECT t.id, t.affiliate, t.amount, t.type, u.display_name
+				"SELECT t.id, t.affiliate, t.amount, t.status, u.display_name
 				FROM {$table} t
 				LEFT JOIN {$wpdb->users} u ON t.affiliate = u.ID
 				ORDER BY t.id DESC
@@ -162,7 +162,7 @@ class WCA_Email_Tester_API {
 				'text' => sprintf(
 					'#%d – %s | Affiliate: %s | Amount: %s',
 					$row->id,
-					ucfirst( str_replace( '_', ' ', $row->type ) ),
+					ucfirst( str_replace( '_', ' ', $row->status ) ),
 					$affiliate_name,
 					wc_price( $row->amount )
 				),
@@ -215,7 +215,7 @@ class WCA_Email_Tester_API {
 	public static function get_transaction_option( int $id ): ?array {
 		global $wpdb;
 		$row = $wpdb->get_row( $wpdb->prepare( // phpcs:ignore
-			"SELECT t.id, t.affiliate, t.amount, t.type, u.display_name
+			"SELECT t.id, t.affiliate, t.amount, t.status, u.display_name
 			FROM {$wpdb->prefix}wca_transactions t
 			LEFT JOIN {$wpdb->users} u ON t.affiliate = u.ID
 			WHERE t.id = %d LIMIT 1",
@@ -230,7 +230,7 @@ class WCA_Email_Tester_API {
 			'text' => sprintf(
 				'#%d – %s | Affiliate: %s | Amount: %s',
 				$row->id,
-				ucfirst( str_replace( '_', ' ', $row->type ) ),
+				ucfirst( str_replace( '_', ' ', $row->status ) ),
 				$affiliate_name,
 				wc_price( $row->amount )
 			),
