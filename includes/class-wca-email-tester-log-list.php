@@ -92,13 +92,25 @@ class WCA_Email_Tester_Log_List extends WP_List_Table {
 	}
 
 	protected function column_to_email( $item ): string {
-		$email = esc_html( $item->to_email );
-		return strlen( $email ) > 50 ? '<span title="' . esc_attr( $item->to_email ) . '">' . esc_html( substr( $item->to_email, 0, 47 ) ) . '…</span>' : $email;
+		return $this->truncate_with_tooltip( (string) $item->to_email, 50 );
 	}
 
 	protected function column_subject( $item ): string {
-		$subject = esc_html( $item->subject );
-		return strlen( $subject ) > 60 ? '<span title="' . esc_attr( $item->subject ) . '">' . esc_html( substr( $item->subject, 0, 57 ) ) . '…</span>' : $subject;
+		return $this->truncate_with_tooltip( (string) $item->subject, 60 );
+	}
+
+	/**
+	 * Truncate raw text (multibyte-safe) and wrap with a title-attribute
+	 * tooltip showing the full value. Length is measured against the raw
+	 * string, never the escaped one, to keep entity-encoded chars correct.
+	 */
+	private function truncate_with_tooltip( string $raw, int $max ): string {
+		if ( mb_strlen( $raw ) <= $max ) {
+			return esc_html( $raw );
+		}
+
+		$truncated = mb_substr( $raw, 0, $max - 3 );
+		return '<span title="' . esc_attr( $raw ) . '">' . esc_html( $truncated ) . '…</span>';
 	}
 
 	protected function column_status( $item ): string {
