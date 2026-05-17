@@ -98,8 +98,11 @@ class WCA_Email_Tester_Sender {
 		$this->mail_sent = false;
 
 		// Attach listeners before firing the hook.
-		add_filter( 'wp_mail', array( $this, '_capture_mail' ), 5 );
+		// Priority order inside the 'wp_mail' filter:
+		//   6 → _override_recipient (replace To:)
+		//   7 → _capture_mail       (snapshot args after override, so captured To matches actual To)
 		add_filter( 'wp_mail', array( $this, '_override_recipient' ), 6 );
+		add_filter( 'wp_mail', array( $this, '_capture_mail' ), 7 );
 		if ( $this->dry_run ) {
 			add_filter( 'pre_wp_mail', array( $this, '_block_mail' ), 5 );
 		}
@@ -112,8 +115,8 @@ class WCA_Email_Tester_Sender {
 		do_action( 'wca_email_tester_after_test_send', $email_type );
 
 		// Detach listeners.
-		remove_filter( 'wp_mail', array( $this, '_capture_mail' ), 5 );
 		remove_filter( 'wp_mail', array( $this, '_override_recipient' ), 6 );
+		remove_filter( 'wp_mail', array( $this, '_capture_mail' ), 7 );
 		if ( $this->dry_run ) {
 			remove_filter( 'pre_wp_mail', array( $this, '_block_mail' ), 5 );
 		}
@@ -226,24 +229,36 @@ class WCA_Email_Tester_Sender {
 		}
 
 		$affiliate_data = array(
-			'first_name' => $user->first_name ?: $user->display_name,
-			'last_name'  => $user->last_name,
-			'email'      => $user->user_email,
+			'first_name'   => $user->first_name ?: $user->display_name,
+			'last_name'    => $user->last_name,
+			'user_email'   => $user->user_email,
+			'display_name' => $user->display_name,
+			'user_id'      => $user->ID,
 		);
 
-		// Temporarily filter to send only the relevant email.
-		if ( 'affiliate_applied' === $type ) {
-			add_filter( 'wc_affiliate_email_admin_application_enabled', '__return_false', 99 );
-		} else {
-			add_filter( 'wc_affiliate_email_affiliate_application_enabled', '__return_false', 99 );
-			add_filter( 'wc_affiliate_email_verification_enabled', '__return_false', 99 );
+		// Isolate to the requested email: disable every sibling that the
+		// wc_affiliate_affiliate_applied hook would otherwise also dispatch.
+		$disabled = ( 'affiliate_applied' === $type )
+			? array(
+				'wc_affiliate_email_admin_application_enabled',
+				'wc_affiliate_email_verification_enabled',
+			)
+			: array(
+				'wc_affiliate_email_affiliate_application_enabled',
+				'wc_affiliate_email_verification_enabled',
+			);
+
+		foreach ( $disabled as $filter ) {
+			add_filter( $filter, '__return_false', 99 );
 		}
 
-		do_action( 'wc_affiliate_affiliate_applied', $affiliate_id, $affiliate_data );
-
-		remove_filter( 'wc_affiliate_email_admin_application_enabled', '__return_false', 99 );
-		remove_filter( 'wc_affiliate_email_affiliate_application_enabled', '__return_false', 99 );
-		remove_filter( 'wc_affiliate_email_verification_enabled', '__return_false', 99 );
+		try {
+			do_action( 'wc_affiliate_affiliate_applied', $affiliate_id, $affiliate_data );
+		} finally {
+			foreach ( $disabled as $filter ) {
+				remove_filter( $filter, '__return_false', 99 );
+			}
+		}
 
 		return '';
 	}
@@ -269,6 +284,8 @@ class WCA_Email_Tester_Sender {
 			return __( 'Affiliate user not found.', 'wc-affiliate-email-tester' );
 		}
 
+		// WCA core triggers the verification email as a side effect of this
+		// filter when its handler runs. The returned value is unused here.
 		apply_filters( 'wc_affiliate_resend_verification_email', array( 'status' => 0, 'message' => '' ), $user );
 		return '';
 	}
@@ -335,14 +352,19 @@ class WCA_Email_Tester_Sender {
 			return __( 'Transaction not found.', 'wc-affiliate-email-tester' );
 		}
 
-		$amount           = (float) ( $row->amount ?? 0 );
+		$amount     = (float) ( $row->amount ?? 0 );
+		$process_at = $row->process_at ?? null;
+		// WCA's compose_payout_processed() expects 'formatted_process_time' in transaction_data.
 		$transaction_data = array(
-			'id'           => $row->id,
-			'affiliate'    => $row->affiliate ?? 0,
-			'amount'       => $amount,
-			'type'         => $row->type ?? '',
-			'note'         => $row->note ?? '',
-			'time'         => $row->time ?? time(),
+			'id'                     => $row->id,
+			'affiliate'              => $row->affiliate ?? 0,
+			'amount'                 => $amount,
+			'status'                 => $row->status ?? '',
+			'notes'                  => $row->notes ?? '',
+			'process_at'             => $process_at,
+			'formatted_process_time' => $process_at
+				? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $process_at ) )
+				: date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ),
 		);
 
 		do_action( 'wc_affiliate_payout_processed', (int) ( $row->affiliate ?? 0 ), $amount, $transaction_data );
@@ -363,7 +385,26 @@ class WCA_Email_Tester_Sender {
 			return __( 'Transaction not found.', 'wc-affiliate-email-tester' );
 		}
 
-		do_action( 'wc_affiliate_transaction_after_create', $transaction_id, $transaction );
+		// WCA bug: handle_transaction_emails() passes recipients as array to Mailer::send(string $to).
+		// Work around by firing wp_mail() ourselves at priority 9 (before WCA's handler at 10),
+		// so our capture filter records it, then swallowing the TypeError WCA throws.
+		$admin_email  = wca_admin_email() ?: get_option( 'admin_email' );
+		$subject      = function_exists( 'wca_get_admin_transaction_subject' )
+			? wca_get_admin_transaction_subject()
+			: __( 'New Transaction Created', 'wc-affiliate-email-tester' );
+		$pre_capture  = static function() use ( $admin_email, $subject ): void {
+			wp_mail( $admin_email, $subject ?: 'New Transaction', '' );
+		};
+		add_action( 'wc_affiliate_transaction_after_create', $pre_capture, 9 );
+
+		try {
+			do_action( 'wc_affiliate_transaction_after_create', $transaction_id, $transaction );
+		} catch ( \TypeError $e ) {
+			// WCA bug: array recipients passed to Mailer::send(string $to). Email captured above.
+		} finally {
+			remove_action( 'wc_affiliate_transaction_after_create', $pre_capture, 9 );
+		}
+
 		return '';
 	}
 
@@ -376,27 +417,74 @@ class WCA_Email_Tester_Sender {
 			return __( 'WC Affiliate model classes not available.', 'wc-affiliate-email-tester' );
 		}
 
+		// Fetch raw affiliate user-id before instantiating the Referral model.
+		// WCA's Referral::load() overwrites $data['affiliate'] with Affiliate::to_array()
+		// (an array), breaking get_affiliate_id() → (int)[] = 0, (int)[...] = 1.
+		// We restore the scalar ID via the wc_affiliate_referral_data filter so that
+		// WCA's email composer can call get_affiliate() correctly.
+		global $wpdb;
+		$affiliate_user_id = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT affiliate FROM {$wpdb->prefix}wca_referrals WHERE id = %d LIMIT 1",
+			$referral_id
+		) );
+
+		$restore_affiliate_id = static function ( array $data, int $id ) use ( $referral_id, $affiliate_user_id ): array {
+			if ( $id === $referral_id ) {
+				$data['affiliate'] = $affiliate_user_id;
+			}
+			return $data;
+		};
+		add_filter( 'wc_affiliate_referral_data', $restore_affiliate_id, PHP_INT_MAX, 2 );
+
 		$referral = new WCA_Referral_Model( $referral_id );
+
+		remove_filter( 'wc_affiliate_referral_data', $restore_affiliate_id, PHP_INT_MAX );
+
 		if ( ! $referral->exists() ) {
 			return __( 'Referral not found.', 'wc-affiliate-email-tester' );
 		}
 
-		// Find latest transaction for this referral's affiliate, or use a stub.
-		global $wpdb;
-		$tx_row = $wpdb->get_row( $wpdb->prepare(
+		$tx_row = $affiliate_user_id ? $wpdb->get_row( $wpdb->prepare(
 			"SELECT id FROM {$wpdb->prefix}wca_transactions WHERE affiliate = %d ORDER BY id DESC LIMIT 1",
-			(int) $referral->get( 'affiliate' )
-		) );
+			$affiliate_user_id
+		) ) : null;
 
-		$transaction_id = $tx_row ? (int) $tx_row->id : 0;
-		$transaction    = $transaction_id ? new WCA_Transaction_Model( $transaction_id ) : null;
-
-		if ( ! $transaction || ! $transaction->exists() ) {
-			// Fire with a dummy transaction when none available.
-			$transaction = null;
+		$transaction = null;
+		if ( $tx_row ) {
+			$candidate = new WCA_Transaction_Model( (int) $tx_row->id );
+			if ( $candidate->exists() ) {
+				$transaction = $candidate;
+			}
 		}
 
-		do_action( 'wc_affiliate_referral_has_paid', $referral_id, $referral, $transaction );
+		// WCA core's paid_referral email handler dereferences the Transaction
+		// object. Refuse to fire rather than risk a fatal in core.
+		if ( null === $transaction ) {
+			return __( 'No transaction found for this referral. Create or process a transaction first.', 'wc-affiliate-email-tester' );
+		}
+
+		// WCA bug: handle_paid_referral_emails() passes the affiliate recipients array
+		// directly to Mailer::send(string $to). Filter converts it to a string so the
+		// affiliate email sends correctly. The admin email always has array($email) wrapping
+		// in WCA code, so its TypeError is caught below.
+		$override     = $this->override_email;
+		$fix_affiliate = static function( $emails ) use ( $override ) {
+			if ( $override ) {
+				return $override;
+			}
+			return is_array( $emails ) ? ( (string) reset( $emails ) ) : (string) $emails;
+		};
+		add_filter( 'wc_affiliate_email_affiliate_paid_referral_recipients', $fix_affiliate, PHP_INT_MAX );
+
+		try {
+			do_action( 'wc_affiliate_referral_has_paid', $referral_id, $referral, $transaction );
+		} catch ( \TypeError $e ) {
+			// WCA bug: admin paid-referral handler passes array recipients to Mailer::send(string $to).
+			// Affiliate email was already captured successfully above.
+		} finally {
+			remove_filter( 'wc_affiliate_email_affiliate_paid_referral_recipients', $fix_affiliate, PHP_INT_MAX );
+		}
+
 		return '';
 	}
 
