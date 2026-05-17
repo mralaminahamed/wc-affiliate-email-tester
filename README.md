@@ -18,7 +18,7 @@ A developer tool to test, preview, and debug every WC Affiliate email notificati
 - **In-browser preview** — renders the full HTML email inside a sandboxed `<iframe>`
 - **Source & headers inspector** — collapsible panels for raw HTML source and mail headers
 - **WC Affiliate Pro support** — auto-detects Pro and adds MLC commission, signup bonus, and referral bonus email types
-- **REST API** — `/wp-json/wca-email-tester/v1/affiliates|referrals|transactions` endpoints power the Select2 search dropdowns
+- **REST API** — admin-only endpoints under `wca-email-tester/v1` power the Select2 search dropdowns (see [REST API](#rest-api))
 
 ## Requirements
 
@@ -45,31 +45,66 @@ composer install --no-dev --optimize-autoloader
 
 ## Email Types
 
+Keys here are the exact `email_type` form values accepted by the tester. They map 1:1 to `WCA_Email_Tester_Sender::email_types()`.
+
 ### Core (WC Affiliate)
 
-| Email type | Trigger |
-|---|---|
-| `affiliate_application_to_affiliate` | Application received (to affiliate) |
-| `affiliate_application_to_admin` | Application received (to admin) |
-| `affiliate_approved_to_affiliate` | Application approved |
-| `affiliate_rejected_to_affiliate` | Application rejected |
-| `new_referral_to_affiliate` | New commission earned |
-| `referral_approved_to_affiliate` | Commission approved |
-| `referral_rejected_to_affiliate` | Commission rejected |
-| `new_payout_to_affiliate` | Payout processed |
-| `withdrawal_request_to_admin` | Withdrawal requested (to admin) |
-| `withdrawal_approved_to_affiliate` | Withdrawal approved |
-| `withdrawal_rejected_to_affiliate` | Withdrawal rejected |
-| `new_transaction_to_affiliate` | New transaction |
-| `transaction_status_changed_to_affiliate` | Transaction status updated |
+| Key | Required input | Underlying core hook |
+|---|---|---|
+| `affiliate_applied` | affiliate | `wc_affiliate_affiliate_applied` |
+| `affiliate_applied_admin` | affiliate | `wc_affiliate_affiliate_applied` |
+| `affiliate_approved` | affiliate | `wc_affiliate_account_reviewed` |
+| `affiliate_rejected` | affiliate | `wc_affiliate_account_reviewed` |
+| `email_verification` | affiliate | `wc_affiliate_resend_verification_email` |
+| `commission_earned` | referral | `wc_affiliate_add_credit` |
+| `commission_earned_admin` | referral | `wc_affiliate_add_credit` |
+| `payout_request` | affiliate | `wc_affiliate_payout_request_created` |
+| `payout_request_admin` | affiliate | `wc_affiliate_payout_request_created` |
+| `payout_processed` | transaction | `wc_affiliate_payout_processed` |
+| `transaction_created_admin` | transaction | `wc_affiliate_transaction_after_create` |
+| `paid_referral` | referral | `wc_affiliate_referral_has_paid` |
+| `paid_referral_admin` | referral | `wc_affiliate_referral_has_paid` |
 
-### Pro (WC Affiliate Pro, auto-detected)
+### Pro (WC Affiliate Pro — auto-detected)
 
-| Email type | Trigger |
-|---|---|
-| `mlc_commission_to_affiliate` | MLC commission earned |
-| `signup_bonus_to_affiliate` | Signup bonus awarded |
-| `referral_bonus_to_affiliate` | Referral bonus awarded |
+| Key | Required input | Underlying core hook |
+|---|---|---|
+| `mlc_commission` | referral | `wc_affiliate_mlc_commission_added` |
+| `signup_bonus` | affiliate | `wc_affiliate_signup_bonus_added` |
+| `referral_bonus` | affiliate | `wc_affiliate_referral_bonus_added` |
+
+The "Required input" column indicates which form field (`affiliate_id`, `referral_id`, or `transaction_id`) the tester needs to fire the email. Pro keys appear automatically when `WC_AFFILIATE_PRO_VERSION` is defined.
+
+## Extension points
+
+| Hook | Type | Purpose |
+|---|---|---|
+| `wca_email_tester_email_types` | filter | Add/remove/rename email types shown in the tester. Receives `array<string, string>` keyed by email-type slug. |
+| `wca_email_tester_before_test_send` | action | Fired right before the tester dispatches the underlying core hook. Receives `string $email_type`. Used internally to tag captured logs with `source=test`. |
+| `wca_email_tester_after_test_send` | action | Fired right after dispatch (regardless of success). Receives `string $email_type`. |
+
+Adding a custom type from another plugin:
+
+```php
+add_filter( 'wca_email_tester_email_types', function ( array $types ): array {
+    $types['my_custom_email'] = __( 'Custom: My Email', 'my-plugin' );
+    return $types;
+} );
+```
+
+Note that adding a type to the dropdown does not by itself teach the tester how to fire it — you must also extend `WCA_Email_Tester_Sender::field_for_type()` and `fire_hook()` via a fork or PR.
+
+## REST API
+
+Namespace: `wca-email-tester/v1`. All endpoints require the `manage_options` capability.
+
+| Method | Endpoint | Query params | Returns |
+|---|---|---|---|
+| GET | `/affiliates` | `search`, `per_page` (max 100) | `[{id:int, text:string}, …]` |
+| GET | `/referrals` | `search`, `per_page` (max 100) | `[{id:int, text:string}, …]` |
+| GET | `/transactions` | `search`, `per_page` (max 100) | `[{id:int, text:string}, …]` |
+
+Responses are Select2-compatible (`{id, text}` pairs).
 
 ## Development
 
